@@ -17,3 +17,21 @@ Cargo.lock
 .vscode/
 
 .DS_Store
+
+# sqlite
+*.db
+*.bat
+*.exp
+*.dll
+*.a
+*.so
+*.sqlite-shm
+*.sqlite-wal
+package-lock.json
+*.sqlite
+node_modules/
+build/
+# C benchmark binary
+bench/bench
+deno.lock
+bun.lockb

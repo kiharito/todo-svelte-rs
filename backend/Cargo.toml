@@ -7,9 +7,9 @@ edition = "2021"
 
 [dependencies]
 axum = { version = "0.7.2", features = ["form", "macros"] }
-axum-error = "0.2.0"
 dotenv = "0.15.0"
 serde = { version = "1.0.193", features = ["derive"] }
 sqlx = { version = "0.7.3", features = ["runtime-tokio", "tls-rustls", "sqlite"] }
 tokio = { version = "1.35.1", features = ["full"] }
 tower-http = { version = "0.5.0", features = ["cors"] }
+anyhow = "1.0.76"
