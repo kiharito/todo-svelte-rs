@@ -1,6 +1,6 @@
 use axum::{
     debug_handler,
-    extract::State,
+    extract::{Path, State},
     http::StatusCode,
     response::{IntoResponse, Response},
     routing::get,
@@ -21,6 +21,7 @@ async fn main() {
     let app = Router::new()
         .route("/", get(list))
         .route("/create", get(create))
+        .route("/delete/:id", get(delete))
         .with_state(pool)
         .layer(CorsLayer::very_permissive());
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();
@@ -59,6 +60,14 @@ async fn create(
     .execute(&pool)
     .await?;
     Ok("Successfully inserted todo!".to_string())
+}
+
+#[debug_handler]
+async fn delete(State(pool): State<SqlitePool>, Path(id): Path<i64>) -> Result<String, AppError> {
+    sqlx::query!("DELETE FROM todos WHERE id = ?", id)
+        .execute(&pool)
+        .await?;
+    Ok("Successfully deleted todo!".to_string())
 }
 
 struct AppError(anyhow::Error);
