@@ -1,9 +1,10 @@
+use axum::response::Redirect;
 use axum::{
     debug_handler,
     extract::{Path, State},
     http::StatusCode,
     response::{IntoResponse, Response},
-    routing::get,
+    routing::{get, post},
     Form, Json, Router,
 };
 use serde::{Deserialize, Serialize};
@@ -20,9 +21,9 @@ async fn main() {
 
     let app = Router::new()
         .route("/", get(list))
-        .route("/create", get(create))
+        .route("/create", post(create))
         .route("/delete/:id", get(delete))
-        .route("/update", get(update))
+        .route("/update", post(update))
         .with_state(pool)
         .layer(CorsLayer::very_permissive());
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();
@@ -53,29 +54,29 @@ async fn list(State(pool): State<SqlitePool>) -> Result<Json<Vec<Todo>>, AppErro
 async fn create(
     State(pool): State<SqlitePool>,
     Form(todo): Form<NewTodo>,
-) -> Result<String, AppError> {
+) -> Result<Redirect, AppError> {
     sqlx::query!(
         "INSERT INTO todos (description) VALUES (?)",
         todo.description
     )
     .execute(&pool)
     .await?;
-    Ok("Successfully inserted todo!".to_string())
+    Ok(Redirect::to("http://localhost:5173"))
 }
 
 #[debug_handler]
-async fn delete(State(pool): State<SqlitePool>, Path(id): Path<i64>) -> Result<String, AppError> {
+async fn delete(State(pool): State<SqlitePool>, Path(id): Path<i64>) -> Result<Redirect, AppError> {
     sqlx::query!("DELETE FROM todos WHERE id = ?", id)
         .execute(&pool)
         .await?;
-    Ok("Successfully deleted todo!".to_string())
+    Ok(Redirect::to("http://localhost:5173"))
 }
 
 #[debug_handler]
 async fn update(
     State(pool): State<SqlitePool>,
     Form(todo): Form<Todo>,
-) -> Result<String, AppError> {
+) -> Result<Redirect, AppError> {
     sqlx::query!(
         "UPDATE todos SET description = ?, done = ? WHERE id = ?",
         todo.description,
@@ -84,7 +85,7 @@ async fn update(
     )
     .execute(&pool)
     .await?;
-    Ok("Successfully updated todo!".to_string())
+    Ok(Redirect::to("http://localhost:5173"))
 }
 
 struct AppError(anyhow::Error);

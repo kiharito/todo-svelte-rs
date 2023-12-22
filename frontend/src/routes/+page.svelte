@@ -1,15 +1,19 @@
-<!-- YOU CAN DELETE EVERYTHING IN THIS PAGE -->
+<script lang="ts">
+    import type {PageData} from "./$types";
 
-<div class="container h-full mx-auto flex justify-center items-center">
-	<div class="space-y-5">
-		<h1 class="h1">Let's get cracking bones!</h1>
-		<p>Start by exploring:</p>
-		<ul>
-			<li><code class="code">/src/routes/+layout.svelte</code> - barebones layout</li>
-			<li><code class="code">/src/app.postcss</code> - app wide css</li>
-			<li>
-				<code class="code">/src/routes/+page.svelte</code> - this page, you can replace the contents
-			</li>
-		</ul>
-	</div>
+    export let data: PageData
+</script>
+
+<div class="container mx-auto mt-16">
+    <h1 class="h1 text-center">Todos</h1>
+
+    <form action="http://0.0.0.0:8000/create" method="post">
+        <input class="input" type="text" name="description" placeholder="What needs to done?">
+    </form>
+
+    {#each data.todos as todo}
+        <p>{todo.id}</p>
+        <p>{todo.description}</p>
+        <p>{todo.done}</p>
+    {/each}
 </div>
