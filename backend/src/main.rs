@@ -22,6 +22,7 @@ async fn main() {
         .route("/", get(list))
         .route("/create", get(create))
         .route("/delete/:id", get(delete))
+        .route("/update", get(update))
         .with_state(pool)
         .layer(CorsLayer::very_permissive());
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();
@@ -68,6 +69,22 @@ async fn delete(State(pool): State<SqlitePool>, Path(id): Path<i64>) -> Result<S
         .execute(&pool)
         .await?;
     Ok("Successfully deleted todo!".to_string())
+}
+
+#[debug_handler]
+async fn update(
+    State(pool): State<SqlitePool>,
+    Form(todo): Form<Todo>,
+) -> Result<String, AppError> {
+    sqlx::query!(
+        "UPDATE todos SET description = ?, done = ? WHERE id = ?",
+        todo.description,
+        todo.done,
+        todo.id
+    )
+    .execute(&pool)
+    .await?;
+    Ok("Successfully updated todo!".to_string())
 }
 
 struct AppError(anyhow::Error);
