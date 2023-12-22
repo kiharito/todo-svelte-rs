@@ -4,7 +4,7 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
     routing::get,
-    Json, Router,
+    Form, Json, Router,
 };
 use serde::{Deserialize, Serialize};
 use sqlx::sqlite::SqlitePool;
@@ -20,6 +20,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/", get(list))
+        .route("/create", get(create))
         .with_state(pool)
         .layer(CorsLayer::very_permissive());
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();
@@ -33,12 +34,31 @@ struct Todo {
     done: bool,
 }
 
+#[derive(Serialize, Deserialize)]
+struct NewTodo {
+    description: String,
+}
+
 #[debug_handler]
 async fn list(State(pool): State<SqlitePool>) -> Result<Json<Vec<Todo>>, AppError> {
     let todos = sqlx::query_as!(Todo, "SELECT id, description, done FROM todos ORDER BY id")
         .fetch_all(&pool)
         .await?;
     Ok(Json(todos))
+}
+
+#[debug_handler]
+async fn create(
+    State(pool): State<SqlitePool>,
+    Form(todo): Form<NewTodo>,
+) -> Result<String, AppError> {
+    sqlx::query!(
+        "INSERT INTO todos (description) VALUES (?)",
+        todo.description
+    )
+    .execute(&pool)
+    .await?;
+    Ok("Successfully inserted todo!".to_string())
 }
 
 struct AppError(anyhow::Error);
