@@ -23,7 +23,7 @@ async fn main() {
         .route("/", get(list))
         .route("/create", post(create))
         .route("/delete/:id", get(delete))
-        .route("/update", post(update))
+        .route("/update", get(update))
         .with_state(pool)
         .layer(CorsLayer::very_permissive());
     let listener = tokio::net::TcpListener::bind("0.0.0.0:8000").await.unwrap();
