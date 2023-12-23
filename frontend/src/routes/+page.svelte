@@ -1,7 +1,13 @@
 <script lang="ts">
     import type {PageData} from "./$types";
+    import {invalidateAll} from "$app/navigation";
 
     export let data: PageData
+
+    async function deleteTodo(id: number) {
+        await fetch(`http://0.0.0.0:8000/delete/${id}`);
+        invalidateAll();
+    }
 </script>
 
 <div class="container mx-auto mt-16">
@@ -15,5 +21,6 @@
         <p>{todo.id}</p>
         <p>{todo.description}</p>
         <p>{todo.done}</p>
+        <button class="btn variant-filled-primary" on:click={deleteTodo(todo.id)}>Delete</button>
     {/each}
 </div>
